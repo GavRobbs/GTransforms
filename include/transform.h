@@ -1,8 +1,11 @@
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <iostream>
+#include <string>
 
 
 class Transform{
@@ -10,38 +13,51 @@ class Transform{
     //The position of the transform relative to its parent
     glm::vec3 localPosition;
 
-    //The rotation of the transform with respect to its parent
-    glm::quat rotation;
+    //This is the rotation of the object around its own axes
+    glm::quat localRotation;
 
     //The scale of the transform - this is combined with the parent transform
     glm::vec3 localScale;
 
     //This defines the local basis vectors of the object
     //These are changed by local rotations
-    glm::vec3 forward_axis;
-    glm::vec3 right_axis;
-    glm::vec3 up_axis;
+    glm::vec3 forward;
+    glm::vec3 right;
+    glm::vec3 up;
 
     Transform * parent;
 
+    //To help with tagging for demonstration purposes
+    std::string name;
+
+    glm::mat4 transform_matrix;
+    glm::mat4 inverse_transform_matrix;
+
+    glm::mat3 basis;
+    glm::mat3 inverse_basis;
+
     public:
+
+    Transform(const std::string &n);
     const glm::vec3 & GetLocalPosition() const;
-    const glm::quat & GetRotation() const;
+    const glm::quat & GetLocalRotation() const;
     const glm::vec3 & GetLocalScale() const;
 
-    const glm::vec3 & GetGlobalPosition() const;
-    const glm::vec3 & GetGlobalScale() const;
+    glm::vec3 GetGlobalPosition();
+    glm::quat GetGlobalRotation();
+    glm::vec3 GetGlobalScale() ;
 
-    const glm::mat4 & GetCombinedTransform() const;
-    const glm::mat3 & GetLocalBasisVectors() const;
+    glm::mat4 GetGlobalTransform();
+    glm::mat4 GetInverseGlobalTransform();
+    glm::mat3 GetLocalBasisVectors();
+    glm::mat3 GetInverseBasisVectors();
 
-    void Translate_Local(glm::vec3 delta);
-    void Translate(glm::vec3 delta);
-    void SetPosition_Local(glm::vec3 pos);
-    void SetPosition(glm::vec3 pos);
+    void Translate_Local(const glm::vec3 &delta);
+    void Translate(const glm::vec3 &delta);
+    void SetPosition_Local(const glm::vec3 & pos);
+    void SetPosition(const glm::vec3 &pos);
 
-    void SetScale(glm::vec3 scale);
-    void Scale(glm::vec3 scale);
+    void SetScale(const glm::vec3 & scale);
 
     //This sets the rotation of the object around its own axis
     void SetRotation_Local(const glm::quat & rot);
@@ -50,10 +66,18 @@ class Transform{
     void SetRotation_Global(const glm::quat & rot);
 
     //This multiplies the current local rotation of the object with the new rotation
-    void Rotate_Local(const glm::quat & rot);
+    void Rotate_Local(const glm::vec3 & angle_axis_degrees);
     
     //This multiples the current global rotation of the object with a new rotation
     void Rotate_Global(const glm::quat & rot);
 
-    friend std::ostream& operator<<(std::ostream & os, const Transform& transform);
-}
+    //Rotates this transform around a point around a specified axis
+    void RotateAroundPoint(const glm::vec3 & point, const glm::quat & rot);
+
+    glm::vec3 LocalToWorld(const glm::vec3 & local_point);
+    glm::vec3 WorldToLocal(const glm::vec3 & world_point);
+
+    void Display();
+
+    void SetParent(Transform * p, bool keepWorldPosition);
+};
