@@ -148,16 +148,6 @@ void Transform::Rotate_Local(const glm::vec3 & angle_axis_degrees){
     right = combined_quat * right;
     up = combined_quat * up;
 }
-    
-void Transform::Rotate_Global(const glm::quat & rot){
-    //This multiples the current global rotation of the object with a new rotation
-    //which in quaternion terms is basically doing an addition of rotations
-    //this will change our transform matrices, so we have to mark it as dirty
-    localRotation *= rot;
-    forward = rot * forward;
-    right = rot * right;
-    up = rot * up;
-}
 
 glm::mat3 Transform::GetLocalBasisVectors(){
 

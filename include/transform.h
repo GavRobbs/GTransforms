@@ -68,9 +68,6 @@ class Transform{
 
     //This multiplies the current local rotation of the object with the new rotation
     void Rotate_Local(const glm::vec3 & angle_axis_degrees);
-    
-    //This multiples the current global rotation of the object with a new rotation
-    void Rotate_Global(const glm::quat & rot);
 
     //Rotates this transform around a point around a specified axis
     void RotateAroundPoint(const glm::vec3 & point, const glm::quat & rot);
