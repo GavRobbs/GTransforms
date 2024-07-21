@@ -48,6 +48,7 @@ class Transform{
     glm::vec3 GetGlobalScale() ;
 
     glm::mat4 GetGlobalTransform();
+    glm::mat4 GetLocalTransform();
     glm::mat4 GetInverseGlobalTransform();
     glm::mat3 GetLocalBasisVectors();
     glm::mat3 GetInverseBasisVectors();
@@ -74,7 +75,10 @@ class Transform{
     //Rotates this transform around a point around a specified axis
     void RotateAroundPoint(const glm::vec3 & point, const glm::quat & rot);
 
+    //Converts a point from local space to world space
     glm::vec3 LocalToWorld(const glm::vec3 & local_point);
+
+    //Converts a point from world space to local space
     glm::vec3 WorldToLocal(const glm::vec3 & world_point);
 
     void Display();

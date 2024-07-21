@@ -51,14 +51,18 @@ glm::vec3 Transform::GetGlobalScale(){
     return parent->GetGlobalScale() * localScale;
 }
 
-glm::mat4 Transform::GetGlobalTransform(){
-
+glm::mat4 Transform::GetLocalTransform(){
     glm::mat4 transform = glm::mat4(1.0f);
     transform = glm::translate(transform, localPosition);
     transform = glm::toMat4(localRotation) * transform;
     transform = glm::scale(transform, localScale);
 
-    glm::to_string(transform);
+    return transform;
+}
+
+glm::mat4 Transform::GetGlobalTransform(){
+
+    glm::mat4 transform = GetLocalTransform();    
 
     if(parent == NULL){
         transform_matrix = transform;
