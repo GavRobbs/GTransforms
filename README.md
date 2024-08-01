@@ -26,12 +26,18 @@ I've made use of quaternions to represent rotations, and they've simplified many
 
 The GLM library was used so that I didn't have to rewrite my own 3d math suite, and it has some useful functions, such as glm::to_string that saved me a lot of time.
 
+To only build the library (for static linking), turn on the BUILD_LIBRARY_ONLY flag.
+
 ## Design Inspiration
 
 The primary design inspiration for this came from how Unity structures its Transform class. Mine isn't as feature complete, but I think I've learnt what I need to from it. I may extend it in the future if/when I build my own scene graph (likely with OpenGL).
+
+## Changes
+
+- 8/1/24: Added the option to build it as a static library, without the example
 
 ## Potential Improvements
 
 - A dirty flag for optimization purposes, to prevent recalculation of the global transformation matrix or basis vectors every time one is requested
 - Some unit tests
-- Convert it to a library instead of an executable
+- Convert it to a library instead of an executable (DONE)
