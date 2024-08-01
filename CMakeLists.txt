@@ -4,11 +4,11 @@ project(GTransforms)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-option(BUILD_LIBRARY_ONLY "Build only the transform.cpp library without the example" OFF)
+option(GTRANSFORMS_BUILD_LIBRARY_ONLY "Build only the transform.cpp library without the example" OFF)
 
 add_subdirectory(external/glm)
 
-if (BUILD_LIBRARY_ONLY)
+if (GTRANSFORMS_BUILD_LIBRARY_ONLY)
     message(STATUS "Building only the static library")
     add_library(${PROJECT_NAME} src/lib/transform.cpp)
 

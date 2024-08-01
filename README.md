@@ -26,7 +26,7 @@ I've made use of quaternions to represent rotations, and they've simplified many
 
 The GLM library was used so that I didn't have to rewrite my own 3d math suite, and it has some useful functions, such as glm::to_string that saved me a lot of time.
 
-To only build the library (for static linking), turn on the BUILD_LIBRARY_ONLY flag.
+To only build the library (for static linking), turn on the GTRANSFORMS_BUILD_LIBRARY_ONLY flag.
 
 ## Design Inspiration
 
