@@ -1,3 +1,6 @@
+#ifndef GTRANSFORMS_H
+#define GTRANSFORMS_H
+
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include <glm/glm.hpp>
@@ -82,3 +85,5 @@ class Transform{
 
     void SetParent(Transform * p, bool keepWorldPosition);
 };
+
+#endif
