@@ -11,7 +11,6 @@ add_subdirectory(external/glm)
 if (GTRANSFORMS_BUILD_LIBRARY_ONLY)
     message(STATUS "Building only the static library")
     add_library(${PROJECT_NAME} src/lib/transform.cpp)
-
 else()
     message(STATUS "Building the examples and the static library")
     add_library(${PROJECT_NAME} src/lib/transform.cpp)
