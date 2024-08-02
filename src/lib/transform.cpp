@@ -38,7 +38,7 @@ glm::quat Transform::GetGlobalRotation(){
     if(parent == NULL){
         return localRotation;
     } else{
-        return parent->localRotation * localRotation;
+        return localRotation * parent->localRotation;
     }
 }
 
@@ -53,9 +53,10 @@ glm::vec3 Transform::GetGlobalScale(){
 
 glm::mat4 Transform::GetLocalTransform(){
     glm::mat4 transform = glm::mat4(1.0f);
-    transform = glm::scale(transform, localScale);
-    transform = glm::toMat4(localRotation) * transform;
+
     transform = glm::translate(transform, localPosition);
+    transform *= glm::toMat4(localRotation);
+    transform = glm::scale(transform, localScale);
 
     return transform;
 }
@@ -91,7 +92,13 @@ void Transform::SetPosition(const glm::vec3 & pos){
     /* This takes a world position and sets the local position, which is why we use the inverse
     Note that bases aren't affected by translation or scaling as we want to keep them as unit vectors
     to avoid chaos */
-    glm::mat4 gt_i = GetInverseGlobalTransform();
+
+    if(parent == nullptr){
+        localPosition = pos;
+        return;
+    }
+
+    glm::mat4 gt_i = parent->GetInverseGlobalTransform();
     localPosition = gt_i * glm::vec4(pos.x, pos.y, pos.z, 1.0f);
 
 }
@@ -139,11 +146,20 @@ void Transform::Rotate_Local(const glm::vec3 & angle_axis_degrees){
     //Note that this changes the basis
     //and note also that the axes uses are the local axes of the transform
 
-    glm::quat combined_quat = glm::angleAxis(glm::radians(angle_axis_degrees.x), right) * 
-    glm::angleAxis(glm::radians(angle_axis_degrees.y), up) *
-    glm::angleAxis(glm::radians(angle_axis_degrees.z), forward);
+    glm::quat combined_quat = 
+    glm::angleAxis(
+        glm::radians(angle_axis_degrees.x), 
+        glm::vec3(1.0f, 0.0f, 0.0f)
+        ) * 
+    glm::angleAxis(
+        glm::radians(angle_axis_degrees.y), 
+        glm::vec3(0.0f, 1.0f, 0.0f)) *
+    glm::angleAxis(
+        glm::radians(angle_axis_degrees.z), 
+        glm::vec3(0.0f, 0.0f, -1.0f)
+        );
 
-    localRotation *= combined_quat;
+    localRotation = combined_quat * localRotation; 
     forward = combined_quat * forward;
     right = combined_quat * right;
     up = combined_quat * up;
@@ -195,7 +211,7 @@ void Transform::SetParent(Transform * p, bool keepWorldPosition = true){
     if(keepWorldPosition){        
         localPosition =  parent->GetInverseGlobalTransform() * glm::vec4(localPosition, 1.0f);
         localRotation = localRotation * glm::inverse(parent->GetGlobalRotation());
-        localScale = parent->GetInverseGlobalTransform() * glm::vec4(localScale, 0.0f);
+        localScale = localScale;
     }     
 }
 

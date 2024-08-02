@@ -3,7 +3,7 @@
 This was a practice project I used to help me understand linear transformations. Game engines like Godot and Unity use these in combination with their scene graphs to position objects. When you have a hierarchical structure, the transformation matrix of an object is generated from the combined transformation matrix of its parents plus its own local transformation matrix, and this is fed to the graphics engine as the model matrix (as in, the same model matrix that makes up model-view-projection).
 
 $$
-M_{local} = M_{translation} \times M_{rotation} \times M_{scale}
+M_{local} = M_{scale} \times M_{rotation} \times M_{translation}
 $$
 
 $$
