@@ -53,9 +53,9 @@ glm::vec3 Transform::GetGlobalScale(){
 
 glm::mat4 Transform::GetLocalTransform(){
     glm::mat4 transform = glm::mat4(1.0f);
+    transform = glm::scale(transform, localScale);
     transform = glm::toMat4(localRotation) * transform;
     transform = glm::translate(transform, localPosition);
-    transform = glm::scale(transform, localScale);
 
     return transform;
 }
