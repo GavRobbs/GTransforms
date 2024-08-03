@@ -11,7 +11,7 @@ Transform::Transform(const std::string &n) : name(n){
 
     right = glm::vec3(1.0f, 0.0f, 0.0f);
     up = glm::vec3(0.0f, 1.0f, 0.0f);
-    forward = glm::vec3(0.0f, 0.0f, -1.0f);
+    forward = glm::vec3(0.0f, 0.0f, 1.0f);
 
     parent = NULL;
 }
@@ -118,7 +118,7 @@ void Transform::SetRotation_Local(const glm::quat & rot){
     //This is a set operation, so it wipes it clean, which means the basis vectors
     //start at hte default and are multiplied appropriately
     localRotation = rot;
-    forward = rot * glm::vec3(0.0f, 0.0f, -1.0f);
+    forward = rot * glm::vec3(0.0f, 0.0f, 1.0f);
     right = rot * glm::vec3(1.0f, 0.0f, 0.0f);
     up = rot * glm::vec3(0.0f, 1.0f, 0.0f);
 }
@@ -136,7 +136,7 @@ void Transform::SetRotation_Global(const glm::quat & rot){
 
     localRotation = rot * glm::inverse(global_rot);
 
-    forward = rot * glm::vec3(0.0f, 0.0f, -1.0f);
+    forward = rot * glm::vec3(0.0f, 0.0f, 1.0f);
     right = rot * glm::vec3(1.0f, 0.0f, 0.0f);
     up = rot * glm::vec3(0.0f, 1.0f, 0.0f);
 }
@@ -156,7 +156,7 @@ void Transform::Rotate_Local(const glm::vec3 & angle_axis_degrees){
         glm::vec3(0.0f, 1.0f, 0.0f)) *
     glm::angleAxis(
         glm::radians(angle_axis_degrees.z), 
-        glm::vec3(0.0f, 0.0f, -1.0f)
+        glm::vec3(0.0f, 0.0f, 1.0f)
         );
 
     localRotation = combined_quat * localRotation; 
