@@ -1,24 +1,24 @@
 add_subdirectory(gtest)
 
-if (MSVC)
-    set_target_properties(gtest PROPERTIES 
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
-        POSITION_INDEPENDENT_CODE ON
-    )
-
-    set_target_properties(gtest_main PROPERTIES 
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
-        POSITION_INDEPENDENT_CODE ON
-    )
-else()
-    set_target_properties(gtest PROPERTIES 
-        POSITION_INDEPENDENT_CODE ON
-    )
-
-    set_target_properties(gtest_main PROPERTIES 
-        POSITION_INDEPENDENT_CODE ON
-    )
-endif()
+#if (MSVC)
+#    set_target_properties(gtest PROPERTIES 
+#        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+#        POSITION_INDEPENDENT_CODE ON
+#    )
+#
+#    set_target_properties(gtest_main PROPERTIES 
+#        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+#        POSITION_INDEPENDENT_CODE ON
+#    )
+#else()
+#    set_target_properties(gtest PROPERTIES 
+#        POSITION_INDEPENDENT_CODE ON
+#    )
+#
+#    set_target_properties(gtest_main PROPERTIES 
+#        POSITION_INDEPENDENT_CODE ON
+#    )
+#endif()
 
 
 
