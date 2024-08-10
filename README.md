@@ -27,15 +27,15 @@ $$
 As objects rotate, their local axes change. If not represented properly, this can lead to Gimbal lock. Quaternions avoid that because they use a 4th dimension. This transform system also includes a hierarchy of rotations from parents to children. Be careful not to confuse rotation around an axis with orbiting around a point:
 - When you rotate around an axis, the origin of the transform does not change position (eg. rotating a cube on the spot). 
 - When you orbit around a point, the position does change (rotating the cube around the origin, this is more often than not
-what you're be thinking about).
+what you're thinking about).
 
 To clarify, if the parent has its own local rotation of 30 degrees around the y-axis and the child has its own local rotation of 45 degrees around the y-axis, the combined global rotation of the child is 75 degrees around the y-axis. This will not affect the position of the child, just the orientation/heading.
 
-To build the library without running the tests, turn on the GTRANSFORMS_NO_TESTS flag. Tests are done using Google Test.
+To build the library and run the tests, use -DGTRANSFORMS_BUILD_TESTS=ON. Tests are written using Google Test and run via ctest.
 
 ## Design Inspiration
 
-The primary design inspiration for this came from how Unity structures its Transform class. Mine isn't as feature complete, but I think I've learnt what I need to from it. I may extend it in the future if/when I build my own scene graph (likely with OpenGL).
+The primary design inspiration for this came from how Unity structures its Transform class, with a few touches from Godot. Mine isn't as feature complete, but I think I've learnt what I need to from it. I may extend it in the future if/when I build my own scene graph (likely with OpenGL).
 
 ## Changes
 
