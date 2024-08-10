@@ -22,7 +22,7 @@ jobs:
         run: mkdir build
 
       - name: Configure cmake for debug
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DGTRANSFORMS_BUILD_TESTS=ON
 
       - name: Build with cmake for debug
         run: cmake --build build --config Debug
@@ -31,7 +31,7 @@ jobs:
         run: ctest --test-dir build --output-on-failure -C Debug
 
       - name: Configure cmake for release
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DGTRANSFORMS_BUILD_TESTS=ON
 
       - name: Build with cmake for release
         run: cmake --build build --config Release

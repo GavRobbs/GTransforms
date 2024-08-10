@@ -66,8 +66,9 @@ namespace gtransforms{
         void SetRotation(const glm::quat &rot, const Space &space = Space::LOCAL);
         void SetScale(const glm::vec3 &scale, const Space &space = Space::LOCAL);
 
-        //Rotates this transform around a point around a specified axis
+        //Rotates this transform around a point around a specified axis, both in world space
         void RotateAroundPoint(const glm::vec3 & point, const glm::quat & rot);
+        void RotateAroundParent(const glm::quat & rot);
 
         //Converts a point from local space to world space
         glm::vec3 LocalToWorld(const glm::vec3 & local_point);

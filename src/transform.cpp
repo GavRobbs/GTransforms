@@ -44,7 +44,7 @@ glm::quat Transform::GetGlobalRotation(){
     if(parent == NULL){
         return localRotation;
     } else{
-        return localRotation * parent->localRotation;
+        return parent->GetGlobalRotation() * localRotation;
     }
 }
 
@@ -101,7 +101,15 @@ void Transform::Translate(const glm::vec3 &delta, const Space &space)
 void Transform::Rotate(const glm::quat &rot, const Space &space)
 {
     if(space == Space::GLOBAL){
-        localRotation = rot * localRotation;
+        auto global_rotation = GetGlobalRotation();
+        auto new_gr = rot * global_rotation;
+
+        if(parent == nullptr){
+            localRotation = new_gr;
+        } else{
+            localRotation = glm::inverse(parent->GetGlobalRotation()) * new_gr;
+        }
+
     } else{
         localRotation = localRotation * rot;
     }
@@ -249,7 +257,44 @@ void Transform::RotateAroundPoint(const glm::vec3 & point, const glm::quat & rot
     glm::vec3 relative_to_point = global_pos - point;
     glm::vec3 rotated = rot * relative_to_point;
     glm::vec3 rot_to_global = rotated + point;
-    localPosition = GetInverseGlobalTransform() * glm::vec4(rot_to_global, 1.0f);
+
+    if(parent != nullptr){
+        localPosition = parent->GetInverseGlobalTransform() * glm::vec4(rot_to_global, 1.0f);
+    } else{
+        localPosition = rot_to_global;
+    }
+}
+
+void Transform::RotateAroundParent(const glm::quat & rot){
+
+    //Rotate the transform around a point around an arbitary axis
+    //First we get the global position of the transform
+    //Then we put it in the point's coordinate system
+    //Then we perform the rotation
+    //Then we put it back in the global coordinate system
+    //Then we put it back in the local coordinate system by multiplying by the inverse of the global transform
+
+    glm::vec3 parent_pos;
+    if(parent == nullptr){
+        parent_pos = glm::vec3{0.0f, 0.0f, 0.0f};
+    } else{
+        parent_pos = parent->GetGlobalPosition();
+    }
+
+    glm::vec3 global_pos = GetGlobalPosition();
+
+    glm::vec3 relative_to_point = global_pos - parent_pos;
+
+    glm::vec3 rotated = rot * relative_to_point;
+
+    glm::vec3 rot_to_global = rotated + parent_pos;
+
+     if(parent != nullptr){
+        localPosition = parent->GetInverseGlobalTransform() * glm::vec4(rot_to_global, 1.0f);
+    } else{
+        localPosition = rot_to_global;
+    }
+
 }
 
 glm::vec3 Transform::LocalToWorld(const glm::vec3 & local_point){
