@@ -3,7 +3,9 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-Transform::Transform(const std::string &n) : name(n){
+using namespace gtransforms;
+
+Transform::Transform(){
     /* We set our defaults here, with everything being 0 or an identity transformation */
     localPosition = glm::vec3(0.0f, 0.0f, 0.0f);
     localScale = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -14,6 +16,10 @@ Transform::Transform(const std::string &n) : name(n){
     forward = glm::vec3(0.0f, 0.0f, 1.0f);
 
     parent = NULL;
+}
+
+Transform::~Transform(){
+
 }
 
 const glm::vec3 & Transform::GetLocalPosition() const{
@@ -83,91 +89,107 @@ glm::mat4 Transform::GetInverseGlobalTransform(){
 
 }
 
-void Transform::SetPosition_Local(const glm::vec3 & pos){
-    //Directly sets the local position, not basis aware
-    localPosition = pos;
-}
-
-void Transform::SetPosition(const glm::vec3 & pos){
-    /* This takes a world position and sets the local position, which is why we use the inverse
-    Note that bases aren't affected by translation or scaling as we want to keep them as unit vectors
-    to avoid chaos */
-
-    if(parent == nullptr){
-        localPosition = pos;
-        return;
-    }
-
-    glm::mat4 gt_i = parent->GetInverseGlobalTransform();
-    localPosition = gt_i * glm::vec4(pos.x, pos.y, pos.z, 1.0f);
-
-}
-
-void Transform::Translate_Local(const glm::vec3 & delta){
-    //This moves the transform along its local axes
-    localPosition += right * delta.x + up * delta.y + forward * delta.z;
-}
-
-void Transform::Translate(const glm::vec3 & delta){
-    /* This function moves the transform in a basis-unaware manner, using the global axes*/
-    localPosition += delta;
-}
-
-void Transform::SetRotation_Local(const glm::quat & rot){
-    //A local rotation changes the basis vectors
-    //This is a set operation, so it wipes it clean, which means the basis vectors
-    //start at hte default and are multiplied appropriately
-    localRotation = rot;
-    forward = rot * glm::vec3(0.0f, 0.0f, 1.0f);
-    right = rot * glm::vec3(1.0f, 0.0f, 0.0f);
-    up = rot * glm::vec3(0.0f, 1.0f, 0.0f);
-}
-
-void Transform::SetRotation_Global(const glm::quat & rot){
-    //This sets the rotation of the object around a global axis
-
-    glm::quat global_rot; 
-
-    if(parent != NULL){
-        global_rot = parent->GetGlobalRotation();
+void Transform::Translate(const glm::vec3 &delta, const Space &space)
+{
+    if(space == Space::LOCAL){
+        localPosition += right * delta.x + up * delta.y + forward * delta.z;
     } else{
-        global_rot = glm::identity<glm::quat>();
+        localPosition += delta;
     }
 
-    localRotation = rot * glm::inverse(global_rot);
+}
+void Transform::Rotate(const glm::quat &rot, const Space &space)
+{
+    if(space == Space::GLOBAL){
+        localRotation = rot * localRotation;
+    } else{
+        localRotation = localRotation * rot;
+    }
 
-    forward = rot * glm::vec3(0.0f, 0.0f, 1.0f);
-    right = rot * glm::vec3(1.0f, 0.0f, 0.0f);
-    up = rot * glm::vec3(0.0f, 1.0f, 0.0f);
+    forward = (localRotation * glm::vec3(0.0f, 0.0f, 1.0f)) * localScale;
+    right = (localRotation * glm::vec3(1.0f, 0.0f, 0.0f)) * localScale;
+    up = (localRotation * glm::vec3(0.0f, 1.0f, 0.0f)) * localScale;
 }
 
-void Transform::Rotate_Local(const glm::vec3 & angle_axis_degrees){
-    //This multiplies the current local rotation of the object with the new rotation
-    //Note that this changes the basis
-    //and note also that the axes uses are the local axes of the transform
+void Transform::Scale(const glm::vec3 &scale, const Space &space)
+{
+    if(space == Space::LOCAL){
+        localScale *= scale;
+    } else{
+        glm::vec3 globalScale = GetGlobalScale();
+        glm::vec3 invglobalScale = glm::vec3(1.0f/globalScale.x, 1.0f/globalScale.y, 1.0f/globalScale.z);
+        localScale = scale * localScale * invglobalScale;
 
-    glm::quat combined_quat = 
-    glm::angleAxis(
-        glm::radians(angle_axis_degrees.x), 
-        glm::vec3(1.0f, 0.0f, 0.0f)
-        ) * 
-    glm::angleAxis(
-        glm::radians(angle_axis_degrees.y), 
-        glm::vec3(0.0f, 1.0f, 0.0f)) *
-    glm::angleAxis(
-        glm::radians(angle_axis_degrees.z), 
-        glm::vec3(0.0f, 0.0f, 1.0f)
-        );
+        localScale.x = scale.x * localScale.x/globalScale.x;
+        localScale.y = scale.y * localScale.y/globalScale.y;
+        localScale.z = scale.z * localScale.z/globalScale.z;
 
-    localRotation = combined_quat * localRotation; 
-    forward = combined_quat * forward;
-    right = combined_quat * right;
-    up = combined_quat * up;
+        forward *= invglobalScale * scale;
+        right *= invglobalScale * scale;
+        up *= invglobalScale * scale;
+    }
+}
+
+void Transform::SetPosition(const glm::vec3 &pos, const Space &space)
+{
+    if(space == Space::LOCAL){
+        localPosition = pos;
+    } else{
+
+        if(parent == nullptr){
+            localPosition = pos;
+        } else{
+            localPosition = parent->WorldToLocal(pos);
+        }
+    }
+}
+
+void Transform::SetRotation(const glm::quat &rot, const Space &space)
+{
+    if(space == Space::GLOBAL){
+        glm::quat global_rot; 
+
+        if(parent != NULL){
+            global_rot = parent->GetGlobalRotation();
+        } else{
+            global_rot = glm::identity<glm::quat>();
+        }
+
+        localRotation = glm::inverse(global_rot) * rot;
+    } else{
+        localRotation = rot;
+    }
+
+    forward = localRotation * glm::vec3(0.0f, 0.0f, 1.0f);
+    right = localRotation * glm::vec3(1.0f, 0.0f, 0.0f);
+    up = localRotation * glm::vec3(0.0f, 1.0f, 0.0f);
+
+}
+
+void Transform::SetScale(const glm::vec3 &scale, const Space &space)
+{
+    if(space == Space::LOCAL){
+        localScale = scale;
+    } 
+    else{
+        if(parent == nullptr){
+            localScale = scale;
+        } else{
+            glm::vec3 globalScale = parent->GetGlobalScale();
+            localScale.x = scale.x/globalScale.x;
+            localScale.y = scale.y/globalScale.y;
+            localScale.z = scale.z/globalScale.z;
+        }
+    }
 }
 
 glm::mat3 Transform::GetLocalBasisVectors(){
 
-    basis = glm::mat3(right.x, right.y, right.z, up.x, up.y, up.z, forward.x, forward.y, forward.z);
+    auto right_n = glm::normalize(right);
+    auto up_n = glm::normalize(up);
+    auto forward_n = glm::normalize(forward);
+
+    basis = glm::mat3(right_n.x, right_n.y, right_n.z, up_n.x, up_n.y, up_n.z, forward_n.x, forward_n.y, forward_n.z);
     inverse_basis = glm::inverse(basis);
     //This gets our basis vectors for our local coordinate system
     return basis;
@@ -182,13 +204,6 @@ glm::mat3 Transform::GetInverseBasisVectors(){
 void Transform::Display(){
 
     glm::vec3 gp = GetGlobalPosition();
-
-    std::cout << "Transform: " << name << std::endl;
-    if(parent == NULL){
-        std::cout << "Parent: NONE" << std::endl;
-    } else{
-        std::cout << "Parent: " << parent->name << std::endl;
-    }
     std::cout << "Local Position (relative to parent): " << glm::to_string(localPosition) << std::endl;
     std::cout << "Local Rotation Quaternion: " << glm::to_string(localRotation) << std::endl;
     std::cout << "Global Rotation Quaternion: " << glm::to_string(GetGlobalRotation()) << std::endl;
@@ -210,15 +225,15 @@ void Transform::SetParent(Transform * p, bool keepWorldPosition = true){
 
     if(keepWorldPosition){        
         localPosition =  parent->GetInverseGlobalTransform() * glm::vec4(localPosition, 1.0f);
-        localRotation = localRotation * glm::inverse(parent->GetGlobalRotation());
-        localScale = localScale;
+        localRotation = glm::inverse(parent->GetGlobalRotation()) * localRotation;
+
+        glm::vec3 sv = parent->GetGlobalScale();
+        sv.x = 1.0f/sv.x;
+        sv.y = 1.0f/sv.y;
+        sv.z = 1.0f/sv.z;
+
+        localScale = localScale * sv;
     }     
-}
-
-void Transform::SetScale(const glm::vec3 &scale){
-
-    //This changes the local scale
-    localScale = scale;
 }
 
 void Transform::RotateAroundPoint(const glm::vec3 & point, const glm::quat & rot){
